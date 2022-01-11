@@ -1,6 +1,6 @@
 name: 'Check linked issues'
 
-description: 'Check if pull requests have their corresponding issues.'
+description: 'Check if pull requests have their corresponding issues..'
 
 branding:
   icon: "check-square"
