@@ -9805,10 +9805,8 @@ async function deleteLinkedIssueComments(octokit, nodes = [], core) {
   await octokit.graphql(
     `
     mutation deleteCommentLinkedIssue($id: ID!) {
-      deleteDiscussionComment(input: {id: $id }) {
-        comment {
-          id
-        }
+      deleteIssueComment(input: {id: $id }) {
+        clientMutationId
       }
     }
     `,
