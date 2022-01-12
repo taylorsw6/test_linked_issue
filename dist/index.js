@@ -9785,7 +9785,7 @@ async function deleteLinkedIssueComments(octokit, nodes = [], core) {
       login === "github-actions" && body.trim() === BODY_COMMENT.trim()
   ).map(({id}) => id);
 
-  await Promise.all(commentsId.map(id => {
+  /*await Promise.all(commentsId.map(id => {
     return octokit.graphql(
       `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -9800,7 +9800,21 @@ async function deleteLinkedIssueComments(octokit, nodes = [], core) {
       }
     );
   })
-  )
+  )*/
+
+  await octokit.graphql(
+    `
+    mutation deleteCommentLinkedIssue($id: ID!) {
+      deleteDiscussionComment(input: {id: $id }) {
+        comment {
+          id
+        }
+    }
+    `,
+    {
+      id: 'IC_kwDOGqTcT848Q1Fm'
+    }
+  );
   
 
   core.info(JSON.stringify(commentsId, undefined, 2))
