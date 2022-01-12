@@ -9670,13 +9670,7 @@ async function run() {
       query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
         repository(owner: $owner, name: $name) {
           pullRequest(number: $number) {
-            edges {
-              cursor
-              node {
-                name
-                id
-              }
-            }
+            id
             closingIssuesReferences {
               totalCount
             }
