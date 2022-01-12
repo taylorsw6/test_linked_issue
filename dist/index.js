@@ -9721,7 +9721,7 @@ function shouldRun() {
   const result = excludeBranches.some((p) => minimatch(sourceBranch, p));
 
   if (result) {
-    core.notice("source branch matched the exclude pattern, exiting...");
+    core.notice("source branch matched the exclude pattern, exiting ...");
   }
 
   return !result;
