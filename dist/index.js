@@ -9468,22 +9468,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 249:
-/***/ ((module) => {
-
-module.exports = eval("require")("./constant");
-
-
-/***/ }),
-
-/***/ 2038:
-/***/ ((module) => {
-
-module.exports = eval("require")("./util");
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -9643,72 +9627,9 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./constant
-var _notfoundconstant = __nccwpck_require__(249);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./util
-var _notfoundutil = __nccwpck_require__(2038);
-;// CONCATENATED MODULE: ./src/action.js
-
-
-
-
-
-const format = (obj) => JSON.stringify(obj, undefined, 2);
-
-async function run() {
-  core.info(`
-    *** ACTION RUN - START ***
-    `);
-
-  try {
-    const { payload, eventName } = github.context;
-
-    if (eventName !== "pull_request") {
-      throw new Error(
-        `This action can only run on "pull_request", but "${eventName}" was received. Please check your workflow.`
-      );
-    }
-
-    core.debug(`
-    *** PAYLOAD ***
-    ${format(payload)}
-    `);
-
-    const {
-      number,
-      repository: { owner, name },
-    } = payload;
-
-    const token = core.getInput("github-token");
-    const octokit = github.getOctokit(token);
-    const data = await (0,_notfoundutil.getLinkedIssues)(octokit, name, number, owner.login);
-
-    core.debug(`
-    *** GRAPHQL DATA ***
-    ${format(data)}
-    `);
-
-    const pullRequest = data?.repository?.pullRequest;
-    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
-    const subjectId = pullRequest?.id;
-
-    core.setOutput("linked_issues_count", linkedIssuesCount);
-
-    if (!linkedIssuesCount) {
-      (0,_notfoundutil.addComment)(octokit, subjectId);
-      core.debug("Comment added. .");
-      core.setFailed(_notfoundconstant.ERROR_MESSAGE);
-    }
-  } catch (error) {
-    core.setFailed(error.message);
-  } finally {
-    core.info(`
-    *** ACTION RUN - END ***
-    `);
-  }
-}
-
-
+;// CONCATENATED MODULE: ./src/constant.js
+const ERROR_MESSAGE =
+  "No linked issues found. Please add the corresponding issues in the pull request description.";
 
 // EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
 var minimatch = __nccwpck_require__(3973);
@@ -9785,6 +9706,70 @@ function getLinkedIssues(
     }
   );
 }
+
+;// CONCATENATED MODULE: ./src/action.js
+
+
+
+
+
+
+const format = (obj) => JSON.stringify(obj, undefined, 2);
+
+async function run() {
+  core.info(`
+    *** ACTION RUN - START ***
+    `);
+
+  try {
+    const { payload, eventName } = github.context;
+
+    if (eventName !== "pull_request") {
+      throw new Error(
+        `This action can only run on "pull_request", but "${eventName}" was received. Please check your workflow.`
+      );
+    }
+
+    core.debug(`
+    *** PAYLOAD ***
+    ${format(payload)}
+    `);
+
+    const {
+      number,
+      repository: { owner, name },
+    } = payload;
+
+    const token = core.getInput("github-token");
+    const octokit = github.getOctokit(token);
+    const data = await getLinkedIssues(octokit, name, number, owner.login);
+
+    core.debug(`
+    *** GRAPHQL DATA ***
+    ${format(data)}
+    `);
+
+    const pullRequest = data?.repository?.pullRequest;
+    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
+    const subjectId = pullRequest?.id;
+
+    core.setOutput("linked_issues_count", linkedIssuesCount);
+
+    if (!linkedIssuesCount) {
+      addComment(octokit, subjectId);
+      core.debug("Comment added. .");
+      core.setFailed(ERROR_MESSAGE);
+    }
+  } catch (error) {
+    core.setFailed(error.message);
+  } finally {
+    core.info(`
+    *** ACTION RUN - END ***
+    `);
+  }
+}
+
+
 
 ;// CONCATENATED MODULE: ./src/index.js
 

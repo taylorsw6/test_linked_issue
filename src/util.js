@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import minimatch from "minimatch";
-import { ERROR_MESSAGE } from "./constant";
+import { ERROR_MESSAGE } from "./constant.js";
 
 function parseCSV(value) {
   if (value.trim() === "") return [];
