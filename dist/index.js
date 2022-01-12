@@ -9761,7 +9761,7 @@ async function run() {
 
     if (!linkedIssuesCount) {
       addComment(octokit, subjectId);
-      core.debug("Comment added. .");
+      core.debug("Comment added..");
       core.setFailed(ERROR_MESSAGE);
     }
   } catch (error) {
