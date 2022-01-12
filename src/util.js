@@ -80,11 +80,29 @@ export function getLinkedIssues(
   );
 }
 
-export function deleteLinkedIssueComments(nodes = [], core) {
-  const comments = nodes.filter(
+export async function deleteLinkedIssueComments(octokit, nodes = [], core) {
+  const commentsId = nodes.filter(
     ({ author: { login }, body = '' }) =>
       login === "github-actions" && body.trim() === BODY_COMMENT.trim()
-  );
+  ).map(({id}) => id);
 
-  core.info(JSON.stringify(comments, undefined, 2))
+  await Promise.all(commentsId.map(id => {
+    return octokit.graphql(
+      `
+      mutation deleteDiscussionComment({input: $id: ID!}) {
+        deleteDiscussionComment(id: $id) {
+          comment {
+            id
+          }
+      }
+      `,
+      {
+        id
+      }
+    );
+  })
+  )
+  
+
+  core.info(JSON.stringify(commentsId, undefined, 2))
 }

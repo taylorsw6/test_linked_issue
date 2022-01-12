@@ -9779,13 +9779,31 @@ function getLinkedIssues(
   );
 }
 
-function deleteLinkedIssueComments(nodes = [], core) {
-  const comments = nodes.filter(
+async function deleteLinkedIssueComments(octokit, nodes = [], core) {
+  const commentsId = nodes.filter(
     ({ author: { login }, body = '' }) =>
       login === "github-actions" && body.trim() === BODY_COMMENT.trim()
-  );
+  ).map(({id}) => id);
 
-  core.info(JSON.stringify(comments, undefined, 2))
+  await Promise.all(commentsId.map(id => {
+    return octokit.graphql(
+      `
+      mutation deleteDiscussionComment({input: $id: ID!}) {
+        deleteDiscussionComment(id: $id) {
+          comment {
+            id
+          }
+      }
+      `,
+      {
+        id
+      }
+    );
+  })
+  )
+  
+
+  core.info(JSON.stringify(commentsId, undefined, 2))
 }
 ;// CONCATENATED MODULE: ./src/action.js
 
@@ -9840,7 +9858,7 @@ async function run() {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
 
-        await deleteLinkedIssueComments(pullRequest?.comments?.nodes, core_namespaceObject);
+        await deleteLinkedIssueComments(octokit, pullRequest?.comments?.nodes, core_namespaceObject);
         
       }
 
