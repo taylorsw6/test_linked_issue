@@ -110,6 +110,7 @@ export async function deleteLinkedIssueComments(octokit, nodes = [], core) {
         comment {
           id
         }
+      }
     }
     `,
     {
