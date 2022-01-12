@@ -10,6 +10,7 @@
     "lint:fix": "eslint src --fix",
     "test": "jest",
     "build": "ncc build src",
+    "clean": "ncc cache clean",
     "prepare": "husky install"
   },
   "dependencies": {
