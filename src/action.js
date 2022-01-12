@@ -1,5 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { ERROR_MESSAGE } from "./constant";
+import { getLinkedIssues, addComment } from "./util";
 
 const format = (obj) => JSON.stringify(obj, undefined, 2);
 
@@ -29,25 +31,7 @@ async function run() {
 
     const token = core.getInput("github-token");
     const octokit = github.getOctokit(token);
-    const data = await octokit.graphql(
-      `
-      query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
-        repository(owner: $owner, name: $name) {
-          pullRequest(number: $number) {
-            id
-            closingIssuesReferences {
-              totalCount
-            }
-          }
-        }
-      }
-      `,
-      {
-        owner: owner.login,
-        name,
-        number,
-      }
-    );
+    const data = await getLinkedIssues(octokit, name, number, owner.login);
 
     core.debug(`
     *** GRAPHQL DATA ***
@@ -61,24 +45,9 @@ async function run() {
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
     if (!linkedIssuesCount) {
-      const errorMessage =
-        "No linked issues found. Please add the corresponding issues in the pull request description.";
-
-      await octokit.graphql(
-        `
-        mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
-          addComment(input:{subjectId: $subjectId, body: $body}) {
-            clientMutationId
-          }
-        }
-      `,
-        {
-          subjectId,
-          body: errorMessage,
-        }
-      );
+      addComment(octokit, subjectId);
       core.debug("Comment added.");
-      core.setFailed(errorMessage);
+      core.setFailed(ERROR_MESSAGE);
     }
   } catch (error) {
     core.setFailed(error.message);
