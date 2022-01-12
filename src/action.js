@@ -33,7 +33,7 @@ async function run() {
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues(octokit, name, number, owner.login);
 
-    core.debug(`
+    core.info(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);

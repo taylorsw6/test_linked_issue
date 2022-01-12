@@ -47,7 +47,7 @@ export function addComment(octokit, subjectId) {
 export function getLinkedIssues(
   octokit,
   repositoryName,
-  repositoryNumber,
+  pullRequestNumber,
   owner
 ) {
   return octokit.graphql(
@@ -56,6 +56,11 @@ export function getLinkedIssues(
       repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
           id
+          comments{
+            nodes {
+              id
+            }
+          }
           closingIssuesReferences {
             totalCount
           }
@@ -66,7 +71,7 @@ export function getLinkedIssues(
     {
       owner,
       name: repositoryName,
-      number: repositoryNumber,
+      number: pullRequestNumber,
     }
   );
 }
