@@ -9696,7 +9696,7 @@ async function run() {
 
     if (!linkedIssuesCount) {
       (0,_notfoundutil.addComment)(octokit, subjectId);
-      core.debug("Comment added.");
+      core.debug("Comment added..");
       core.setFailed(_notfoundconstant.ERROR_MESSAGE);
     }
   } catch (error) {
