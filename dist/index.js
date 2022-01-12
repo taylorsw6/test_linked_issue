@@ -9656,7 +9656,6 @@ async function run() {
     *** PAYLOAD ***
     ${format(payload)}
     `);
-    
 
     const {
       number,
