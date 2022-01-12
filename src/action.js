@@ -65,14 +65,7 @@ async function run() {
 
       core.setFailed(ERROR_MESSAGE);
     } else {
-      const comments = (pullRequest?.comments?.nodes || []).filter(
-        ({ author: { login }, body = '' }) =>
-          login === "github-actions" && body.trim() === BODY_COMMENT.trim()
-      );
-
-      console.log({comments})
-
-      await deleteLinkedIssueComments(octokit, comments);
+      await deleteLinkedIssueComments(octokit);
     }
   } catch (error) {
     core.setFailed(error.message);
