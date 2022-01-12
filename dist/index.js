@@ -9788,8 +9788,8 @@ async function deleteLinkedIssueComments(octokit, nodes = [], core) {
   await Promise.all(commentsId.map(id => {
     return octokit.graphql(
       `
-      mutation deleteDiscussionComment({input: $id: ID!}) {
-        deleteDiscussionComment(id: $id) {
+      mutation deleteDiscussionComment($id: ID!) {
+        deleteDiscussionComment({input: id: $id }) {
           comment {
             id
           }
