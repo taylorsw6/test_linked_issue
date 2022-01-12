@@ -48,7 +48,7 @@ async function run() {
       }
     );
 
-    core.debug(`
+    core.info(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
