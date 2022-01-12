@@ -39,7 +39,7 @@ export function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: ERROR_MESSAGE,
+      body: `${ERROR_MESSAGE} [reference](http://www.google.com)`,
     }
   );
 }
