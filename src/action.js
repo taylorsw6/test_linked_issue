@@ -44,6 +44,13 @@ async function run() {
               totalCount
             }
           }
+          edges {
+            cursor
+            node {
+              name
+              id
+            }
+          }
         }
       }
       `,
