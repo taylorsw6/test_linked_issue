@@ -80,8 +80,8 @@ export function getLinkedIssues(
   );
 }
 
-export function deleteLinkedIssueComments() {
-  const comments = (pullRequest?.comments?.nodes || []).filter(
+export function deleteLinkedIssueComments(nodes = [], core) {
+  const comments = nodes.filter(
     ({ author: { login }, body = '' }) =>
       login === "github-actions" && body.trim() === BODY_COMMENT.trim()
   );

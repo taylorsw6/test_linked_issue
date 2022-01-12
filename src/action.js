@@ -54,7 +54,7 @@ async function run() {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
 
-        await deleteLinkedIssueComments(octokit);
+        await deleteLinkedIssueComments(pullRequest?.comments?.nodes, core);
         
       }
 
