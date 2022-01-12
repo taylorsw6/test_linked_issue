@@ -9468,14 +9468,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5892:
-/***/ ((module) => {
-
-module.exports = eval("require")("./constants.js");
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -9635,10 +9627,6 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./constants.js
-var _notfoundconstants = __nccwpck_require__(5892);
-// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
-var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/constant.js
 const ERROR_MESSAGE =
   "No linked issues found. Please add the corresponding issues in the pull request description.";
@@ -9647,6 +9635,8 @@ const BODY_COMMENT = `${ERROR_MESSAGE} <br/>
   [Use GitHub automation to close the issue when a PR is merged](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
   `;
 
+// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
+var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/util.js
 
 
@@ -9773,7 +9763,7 @@ async function run() {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
       }
-      core.setFailed(_notfoundconstants.ERROR_MESSAGE);
+      core.setFailed(ERROR_MESSAGE);
     }
   } catch (error) {
     core.setFailed(error.message);

@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { ERROR_MESSAGE } from "./constants.js";
+import { ERROR_MESSAGE } from "./constant.js";
 import { getLinkedIssues, addComment } from "./util.js";
 
 const format = (obj) => JSON.stringify(obj, undefined, 2);
