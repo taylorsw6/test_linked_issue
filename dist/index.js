@@ -9717,6 +9717,7 @@ var minimatch = __nccwpck_require__(3973);
 
 
 
+
 function parseCSV(value) {
   if (value.trim() === "") return [];
   return value.split(",").map((p) => p.trim());
@@ -9740,6 +9741,49 @@ function shouldRun() {
   }
 
   return !result;
+}
+
+function addComment(octokit, subjectId) {
+  return octokit.graphql(
+    `
+        mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
+          addComment(input:{subjectId: $subjectId, body: $body}) {
+            clientMutationId
+          }
+        }
+      `,
+    {
+      subjectId,
+      body: ERROR_MESSAGE,
+    }
+  );
+}
+
+function getLinkedIssues(
+  octokit,
+  repositoryName,
+  repositoryNumber,
+  owner
+) {
+  return octokit.graphql(
+    `
+    query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
+      repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+          id
+          closingIssuesReferences {
+            totalCount
+          }
+        }
+      }
+    }
+    `,
+    {
+      owner,
+      name: repositoryName,
+      number: repositoryNumber,
+    }
+  );
 }
 
 ;// CONCATENATED MODULE: ./src/index.js
