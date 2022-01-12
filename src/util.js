@@ -90,7 +90,7 @@ export async function deleteLinkedIssueComments(octokit, nodes = [], core) {
     return octokit.graphql(
       `
       mutation deleteDiscussionComment($id: ID!) {
-        deleteDiscussionComment({input: id: $id }) {
+        deleteDiscussionComment(input: {id: $id }) {
           comment {
             id
           }
