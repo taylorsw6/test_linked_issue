@@ -9630,6 +9630,7 @@ var github = __nccwpck_require__(5438);
 ;// CONCATENATED MODULE: ./src/constant.js
 const ERROR_MESSAGE =
   "No linked issues found. Please add the corresponding issues in the pull request description.";
+  const constant_REFERENCE_LINK = 'https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword'
 
 // EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
 var minimatch = __nccwpck_require__(3973);
@@ -9675,7 +9676,8 @@ function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: `${ERROR_MESSAGE} [reference](http://www.google.com)`,
+      body: `${ERROR_MESSAGE} <br/> 
+      [Use GitHub automation to close the issue when a PR is merged](${REFERENCE_LINK})`,
     }
   );
 }

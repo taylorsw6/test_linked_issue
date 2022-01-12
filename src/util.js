@@ -39,7 +39,8 @@ export function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: `${ERROR_MESSAGE} [reference](http://www.google.com)`,
+      body: `${ERROR_MESSAGE} <br/> 
+      [Use GitHub automation to close the issue when a PR is merged](${REFERENCE_LINK})`,
     }
   );
 }
