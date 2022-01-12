@@ -7,7 +7,7 @@ const format = (obj) => JSON.stringify(obj, undefined, 2);
 
 async function run() {
   core.info(`
-    *** ACTION RUN - START ***
+    *** ACTION RUN - START  ***
     `);
 
   try {
