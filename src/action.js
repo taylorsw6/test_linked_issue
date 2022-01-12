@@ -1,7 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-
-import { ERROR_MESSAGE } from "./constant.js";
+import { ERROR_MESSAGE } from "./constants.js";
 import { getLinkedIssues, addComment } from "./util.js";
 
 const format = (obj) => JSON.stringify(obj, undefined, 2);
@@ -34,19 +33,22 @@ async function run() {
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues(octokit, name, number, owner.login);
 
-    core.info(`
+    core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
 
-    const linkedIssuesCount =
-      data?.repository?.pullRequest?.closingIssuesReferences?.totalCount;
+    const pullRequest = data?.repository?.pullRequest;
+    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
     if (!linkedIssuesCount) {
-      addComment(octokit, subjectId);
-      core.debug("Comment added.");
+      const subjectId = pullRequest?.id;
+      if (subjectId) {
+        await addComment(octokit, subjectId);
+        core.debug("Comment added.");
+      }
       core.setFailed(ERROR_MESSAGE);
     }
   } catch (error) {

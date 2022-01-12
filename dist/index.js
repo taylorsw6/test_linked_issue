@@ -9468,6 +9468,14 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 5892:
+/***/ ((module) => {
+
+module.exports = eval("require")("./constants.js");
+
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -9627,6 +9635,10 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
+// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./constants.js
+var _notfoundconstants = __nccwpck_require__(5892);
+// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
+var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/constant.js
 const ERROR_MESSAGE =
   "No linked issues found. Please add the corresponding issues in the pull request description.";
@@ -9635,8 +9647,6 @@ const BODY_COMMENT = `${ERROR_MESSAGE} <br/>
   [Use GitHub automation to close the issue when a PR is merged](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
   `;
 
-// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
-var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/util.js
 
 
@@ -9717,7 +9727,6 @@ function getLinkedIssues(
 
 
 
-
 const format = (obj) => JSON.stringify(obj, undefined, 2);
 
 async function run() {
@@ -9748,20 +9757,23 @@ async function run() {
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues(octokit, name, number, owner.login);
 
-    core.info(`
+    core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
 
-    const linkedIssuesCount =
-      data?.repository?.pullRequest?.closingIssuesReferences?.totalCount;
+    const pullRequest = data?.repository?.pullRequest;
+    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
     if (!linkedIssuesCount) {
-      addComment(octokit, subjectId);
-      core.debug("Comment added.");
-      core.setFailed(ERROR_MESSAGE);
+      const subjectId = pullRequest?.id;
+      if (subjectId) {
+        await addComment(octokit, subjectId);
+        core.debug("Comment added.");
+      }
+      core.setFailed(_notfoundconstants.ERROR_MESSAGE);
     }
   } catch (error) {
     core.setFailed(error.message);
