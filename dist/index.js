@@ -9468,18 +9468,10 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 249:
+/***/ 6403:
 /***/ ((module) => {
 
-module.exports = eval("require")("./constant");
-
-
-/***/ }),
-
-/***/ 2038:
-/***/ ((module) => {
-
-module.exports = eval("require")("./util");
+module.exports = eval("require")("./util.sj");
 
 
 /***/ }),
@@ -9643,11 +9635,14 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./constant
-var _notfoundconstant = __nccwpck_require__(249);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./util
-var _notfoundutil = __nccwpck_require__(2038);
+;// CONCATENATED MODULE: ./src/constant.js
+const constant_ERROR_MESSAGE =
+  "No linked issues found. Please add the corresponding issues in the pull request description.";
+
+// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./util.sj
+var _notfoundutil = __nccwpck_require__(6403);
 ;// CONCATENATED MODULE: ./src/action.js
+
 
 
 
@@ -9696,7 +9691,7 @@ async function run() {
     if (!linkedIssuesCount) {
       (0,_notfoundutil.addComment)(octokit, subjectId);
       core.debug("Comment added.");
-      core.setFailed(_notfoundconstant.ERROR_MESSAGE);
+      core.setFailed(constant_ERROR_MESSAGE);
     }
   } catch (error) {
     core.setFailed(error.message);
@@ -9712,6 +9707,7 @@ async function run() {
 // EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
 var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/util.js
+
 
 
 
@@ -9739,6 +9735,49 @@ function shouldRun() {
   }
 
   return !result;
+}
+
+function addComment(octokit, subjectId) {
+  return octokit.graphql(
+    `
+        mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
+          addComment(input:{subjectId: $subjectId, body: $body}) {
+            clientMutationId
+          }
+        }
+      `,
+    {
+      subjectId,
+      body: ERROR_MESSAGE,
+    }
+  );
+}
+
+function getLinkedIssues(
+  octokit,
+  repositoryName,
+  repositoryNumber,
+  owner
+) {
+  return octokit.graphql(
+    `
+    query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
+      repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+          id
+          closingIssuesReferences {
+            totalCount
+          }
+        }
+      }
+    }
+    `,
+    {
+      owner,
+      name: repositoryName,
+      number: repositoryNumber,
+    }
+  );
 }
 
 ;// CONCATENATED MODULE: ./src/index.js

@@ -9,7 +9,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "jest",
-    "build": "ncc build src",
+    "build": "ncc build src --target es2020",
     "clean": "ncc cache clean",
     "prepare": "husky install"
   },
