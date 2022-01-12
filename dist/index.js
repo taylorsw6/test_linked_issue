@@ -9631,7 +9631,7 @@ var github = __nccwpck_require__(5438);
 const ERROR_MESSAGE =
   "No linked issues found. Please add the corresponding issues in the pull request description.";
   
-const constants_BODY_COMMENT = `${ERROR_MESSAGE} <br/> 
+const BODY_COMMENT = `${ERROR_MESSAGE} <br/> 
   [Use GitHub automation to close the issue when a PR is merged](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
   `;
 
@@ -9679,7 +9679,7 @@ function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: constants_BODY_COMMENT,
+      body: BODY_COMMENT,
     }
   );
 }
@@ -9723,10 +9723,10 @@ function getLinkedIssues(
 function deleteLinkedIssueComments() {
   const comments = (pullRequest?.comments?.nodes || []).filter(
     ({ author: { login }, body = '' }) =>
-      login === "github-actions" && body.trim() === constants_BODY_COMMENT.trim()
+      login === "github-actions" && body.trim() === BODY_COMMENT.trim()
   );
 
-  console.log({comments})
+  core.info(JSON.stringify(comments, undefined, 2))
 }
 ;// CONCATENATED MODULE: ./src/action.js
 
@@ -9781,12 +9781,7 @@ async function run() {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
 
-        const comments = (pullRequest?.comments?.nodes || []).filter(
-          ({ author: { login }, body = '' }) =>
-            login === "github-actions" && body.trim() === BODY_COMMENT.trim()
-        );
-  
-        console.log({comments})
+        await deleteLinkedIssueComments(octokit);
         
       }
 

@@ -86,5 +86,5 @@ export function deleteLinkedIssueComments() {
       login === "github-actions" && body.trim() === BODY_COMMENT.trim()
   );
 
-  console.log({comments})
+  core.info(JSON.stringify(comments, undefined, 2))
 }
