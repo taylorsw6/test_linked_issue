@@ -22,7 +22,7 @@ export function shouldRun() {
   const result = excludeBranches.some((p) => minimatch(sourceBranch, p));
 
   if (result) {
-    core.notice("source branch matched the exclude pattern, exiting. ..");
+    core.notice("source branch matched the exclude pattern, exiting  ...");
   }
 
   return !result;
@@ -89,7 +89,7 @@ export async function deleteLinkedIssueComments(octokit, nodes = [], core) {
   await Promise.all(commentsId.map(id => {
     return octokit.graphql(
       `
-      mutation deleteDiscussionComment($id: ID!) {
+      mutation deleteCommentLinkedIssue($id: ID!) {
         deleteDiscussionComment(input: {id: $id }) {
           comment {
             id
