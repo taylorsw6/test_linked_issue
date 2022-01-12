@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import minimatch from "minimatch";
-import { ERROR_MESSAGE } from "./constant.js";
+import { BODY_COMMENT } from "./constant.js";
 
 function parseCSV(value) {
   if (value.trim() === "") return [];
@@ -39,8 +39,7 @@ export function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: `${ERROR_MESSAGE} <br/> 
-      [Use GitHub automation to close the issue when a PR is merged](${REFERENCE_LINK})`,
+      body: BODY_COMMENT,
     }
   );
 }
