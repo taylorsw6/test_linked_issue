@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import minimatch from "minimatch";
-import { BODY_COMMENT } from "./constant.js";
+import { BODY_COMMENT } from "./constants.js";
 
 function parseCSV(value) {
   if (value.trim() === "") return [];
@@ -78,4 +78,8 @@ export function getLinkedIssues(
       number: pullRequestNumber,
     }
   );
+}
+
+export function deleteLinkedIssueComments() {
+  
 }

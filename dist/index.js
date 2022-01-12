@@ -9468,14 +9468,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5892:
-/***/ ((module) => {
-
-module.exports = eval("require")("./constants.js");
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -9635,18 +9627,16 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/@vercel/ncc/dist/ncc/@@notfound.js?./constants.js
-var _notfoundconstants = __nccwpck_require__(5892);
-// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
-var minimatch = __nccwpck_require__(3973);
-;// CONCATENATED MODULE: ./src/constant.js
+;// CONCATENATED MODULE: ./src/constants.js
 const ERROR_MESSAGE =
   "No linked issues found. Please add the corresponding issues in the pull request description.";
   
-const BODY_COMMENT = `${ERROR_MESSAGE} <br/> 
+const constants_BODY_COMMENT = `${ERROR_MESSAGE} <br/> 
   [Use GitHub automation to close the issue when a PR is merged](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
   `;
 
+// EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
+var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/util.js
 
 
@@ -9689,7 +9679,7 @@ function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: BODY_COMMENT,
+      body: constants_BODY_COMMENT,
     }
   );
 }
@@ -9730,6 +9720,9 @@ function getLinkedIssues(
   );
 }
 
+function deleteLinkedIssueComments() {
+  
+}
 ;// CONCATENATED MODULE: ./src/action.js
 
 
@@ -9778,11 +9771,30 @@ async function run() {
 
     if (!linkedIssuesCount) {
       const subjectId = pullRequest?.id;
+
       if (subjectId) {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
+
+        const comments = (pullRequest?.comments?.nodes || []).filter(
+          ({ author: { login }, body = '' }) =>
+            login === "github-actions" && body.trim() === BODY_COMMENT.trim()
+        );
+  
+        console.log({comments})
+        
       }
-      core.setFailed(_notfoundconstants.ERROR_MESSAGE);
+
+      core.setFailed(ERROR_MESSAGE);
+    } else {
+      const comments = (pullRequest?.comments?.nodes || []).filter(
+        ({ author: { login }, body = '' }) =>
+          login === "github-actions" && body.trim() === BODY_COMMENT.trim()
+      );
+
+      console.log({comments})
+
+      await deleteLinkedIssueComments(octokit, comments);
     }
   } catch (error) {
     core.setFailed(error.message);
