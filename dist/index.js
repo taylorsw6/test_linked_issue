@@ -9635,16 +9635,11 @@ const format = (obj) => JSON.stringify(obj, undefined, 2);
 
 async function run() {
   core.info(`
-    *** ACTION RUN - START **sssss*
+    *** ACTION RUN - START ***
     `);
 
   try {
     const { payload, eventName } = github.context;
-
-    core.info(`
-      *** PAYLOAD ***
-      ${format(payload)}
-      `);
 
     if (eventName !== "pull_request") {
       throw new Error(
@@ -9656,7 +9651,6 @@ async function run() {
     *** PAYLOAD ***
     ${format(payload)}
     `);
-    
 
     const {
       number,
@@ -9685,18 +9679,14 @@ async function run() {
       }
     );
 
-    core.info(`
+    core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
 
-    const {id, ...pullRequest} = data?.repository?.pullRequest;
+    const pullRequest = data?.repository?.pullRequest;
     const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
-
-    core.info(`
-    *** {id, ...pullRequest}***
-    ${format({id, ...pullRequest})}
-    `);
+    const subjectId = pullRequest?.id;
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
@@ -9704,20 +9694,20 @@ async function run() {
       const errorMessage =
         "No linked issues found. Please add the corresponding issues in the pull request description.";
 
-      const mutationQuery = `mutation
-          addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
-            addComment(input:{subjectId: $subjectId, body: $body}) {
-              clientMutationId
-            }
+      await octokit.graphql(
+        `
+        mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
+          addComment(input:{subjectId: $subjectId, body: $body}) {
+            clientMutationId
           }
-        `;
-
-      await octokit.graphql(mutationQuery, {
-        subjectId: id,
-        body: errorMessage,
-      });
+        }
+      `,
+        {
+          subjectId,
+          body: errorMessage,
+        }
+      );
       core.debug("Comment added.");
-
       core.setFailed(errorMessage);
     }
   } catch (error) {
