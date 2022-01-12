@@ -9690,8 +9690,13 @@ async function run() {
     ${format(data)}
     `);
 
-    const linkedIssuesCount =
-      data?.repository?.pullRequest?.closingIssuesReferences?.totalCount;
+    const {id, ...pullRequest} = data?.repository?.pullRequest;
+    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
+
+    core.info(`
+    *** {id, ...pullRequest}***
+    ${format({id, ...pullRequest})}
+    `);
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
@@ -9708,7 +9713,7 @@ async function run() {
         `;
 
       await octokit.graphql(mutationQuery, {
-        subjectId: owner.login,
+        subjectId: id,
         body: errorMessage,
       });
       core.debug("Comment added.");
