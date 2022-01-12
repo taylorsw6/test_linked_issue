@@ -56,9 +56,13 @@ export function getLinkedIssues(
       repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
           id
-          comments{
+          comments(first: 100){
             nodes {
               id
+              author {
+                login
+              }
+              body
             }
           }
           closingIssuesReferences {
