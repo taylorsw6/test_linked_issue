@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import minimatch from "minimatch";
+import { ERROR_MESSAGE } from "./constant";
 
 function parseCSV(value) {
   if (value.trim() === "") return [];
@@ -25,4 +26,47 @@ export function shouldRun() {
   }
 
   return !result;
+}
+
+export function addComment(octokit, subjectId) {
+  return octokit.graphql(
+    `
+        mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
+          addComment(input:{subjectId: $subjectId, body: $body}) {
+            clientMutationId
+          }
+        }
+      `,
+    {
+      subjectId,
+      body: ERROR_MESSAGE,
+    }
+  );
+}
+
+export function getLinkedIssues(
+  octokit,
+  repositoryName,
+  repositoryNumber,
+  owner
+) {
+  return octokit.graphql(
+    `
+    query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
+      repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+          id
+          closingIssuesReferences {
+            totalCount
+          }
+        }
+      }
+    }
+    `,
+    {
+      owner,
+      name: repositoryName,
+      number: repositoryNumber,
+    }
+  );
 }
