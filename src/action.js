@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { ERROR_MESSAGE } from "./constants.js";
+import { ERROR_MESSAGE, } from "./constants.js";
 import {
   getLinkedIssues,
   addComment,
@@ -54,12 +54,7 @@ async function run() {
         await addComment(octokit, subjectId);
         core.debug("Comment added.");
 
-        const comments = (pullRequest?.comments?.nodes || []).filter(
-          ({ author: { login }, body = '' }) =>
-            login === "github-actions" && body.trim() === BODY_COMMENT.trim()
-        );
-  
-        console.log({comments})
+        await deleteLinkedIssueComments(octokit);
         
       }
 
