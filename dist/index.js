@@ -9687,7 +9687,7 @@ function addComment(octokit, subjectId) {
 function getLinkedIssues(
   octokit,
   repositoryName,
-  repositoryNumber,
+  pullRequestNumber,
   owner
 ) {
   return octokit.graphql(
@@ -9696,6 +9696,11 @@ function getLinkedIssues(
       repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
           id
+          comments{
+            nodes {
+              id
+            }
+          }
           closingIssuesReferences {
             totalCount
           }
@@ -9706,7 +9711,7 @@ function getLinkedIssues(
     {
       owner,
       name: repositoryName,
-      number: repositoryNumber,
+      number: pullRequestNumber,
     }
   );
 }
@@ -9747,7 +9752,7 @@ async function run() {
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues(octokit, name, number, owner.login);
 
-    core.debug(`
+    core.info(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
