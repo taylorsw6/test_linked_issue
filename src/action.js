@@ -48,15 +48,14 @@ async function run() {
     ${format(data)}
     `);
 
-    octokit
-      .paginate("GET /repos/{owner}/{repo}/issues/{prNumber}/comments", {
-        owner: owner.login,
-        repo: name,
-        prNumber: number,
-      })
-      .then((issues) => {
-        core.info("Issues: "+format(issues));
-      });
+    const issues = await getPrComments({
+      octokit,
+      repoName: name,
+      prNumber: number,
+      repoOwner: owner.login,
+    });
+
+    core.info("Issues: " + format(issues));
 
     const pullRequest = data?.repository?.pullRequest;
     const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
