@@ -85,29 +85,28 @@ export function getLinkedIssues(
   );
 }
 
-export async function getPrComments({ octokit, repoName, prNumber, owner }) {
+function filterLinkedIssuesComments(issues = []) {
+  return issues.filter((issue) => {
+    // it will only filter comments made by this action
+    const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+    if (match) {
+      const actionName = JSON.parse(match[1])["action"];
+      return actionName === 'linked_issue';
+    }
+  });
+}
+
+export async function getPrComments({ octokit, repoName, prNumber, repoOwner }) {
   const issues = await octokit.paginate(
     "GET /repos/{owner}/{repo}/issues/{prNumber}/comments",
     {
-      owner,
+      owner: repoOwner,
       repo: repoName,
       prNumber,
     }
   );
 
-  const linkedIssuesComments = issues.filter((issue) => {
-    // it will only filter comments made by this action
-
-    const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
-
-    if (match) {
-      const actionName = JSON.parse(match[1])["action"];
-
-      return actionName === 'linked_issue';
-    }
-  });
-
-  return linkedIssuesComments
+ return filterLinkedIssuesComments(issues);
 }
 
 /*export function deleteLinkedIssueComments({
