@@ -9687,7 +9687,7 @@ function addComment({octokit, prId, body}) {
       `,
     {
       subjectId: prId,
-      body,
+      body: `${body} ${addMetadata({action: 'linked_issue'})}`,
     }
   );
 }
