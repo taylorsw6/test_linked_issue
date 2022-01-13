@@ -8,6 +8,12 @@ function parseCSV(value) {
   return value.split(",").map((p) => p.trim());
 }
 
+function addMetadata(data) {
+  // to identify the comment was made by this action
+  // https://github.com/probot/metadata#how-it-works
+  return `<!-- metadata = ${JSON.stringify(data)} -->`;
+}
+
 export function shouldRun() {
   const excludeBranches = parseCSV(
     core.getInput("exclude-branches", {
@@ -39,7 +45,7 @@ export function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: BODY_COMMENT,
+      body: `${BODY_COMMENT} ${addMetadata({ action: 'linked_issue' })}`,
     }
   );
 }
@@ -79,11 +85,36 @@ export function getLinkedIssues(
   );
 }
 
-/*export function deleteLinkedIssueComments(octokit, nodes = []) {
-  if (!nodes.length) {
-    return;
-  }
+export async function getPrComments({ octokit, repoName, prNumber, owner }) {
+  const issues = await octokit.paginate(
+    "GET /repos/{owner}/{repo}/issues/{prNumber}/comments",
+    {
+      owner,
+      repo: repoName,
+      prNumber,
+    }
+  );
 
+  const linkedIssuesComments = issues.filter((issue) => {
+    // it will only filter comments made by this action
+
+    const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+
+    if (match) {
+      const actionName = JSON.parse(match[1])["action"];
+
+      return actionName === 'linked_issue';
+    }
+  });
+
+  return linkedIssuesComments
+}
+
+/*export function deleteLinkedIssueComments({
+  octokit,
+  prNumber: number,
+  repoName: name,
+}) {
   return Promise.all(
     nodes.map((id) =>
       octokit.graphql(

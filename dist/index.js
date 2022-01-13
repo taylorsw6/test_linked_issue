@@ -9635,6 +9635,8 @@ const BODY_COMMENT = `${ERROR_MESSAGE} <br/>
   [Use GitHub automation to close the issue when a PR is merged](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)
   `;
 
+const REGEX_METADATA = /\n\n<!-- metadata = (.*) -->/
+
 // EXTERNAL MODULE: ./node_modules/minimatch/minimatch.js
 var minimatch = __nccwpck_require__(3973);
 ;// CONCATENATED MODULE: ./src/util.js
@@ -9646,6 +9648,12 @@ var minimatch = __nccwpck_require__(3973);
 function parseCSV(value) {
   if (value.trim() === "") return [];
   return value.split(",").map((p) => p.trim());
+}
+
+function addMetadata(data) {
+  // to identify the comment was made by this action
+  // https://github.com/probot/metadata#how-it-works
+  return `<!-- metadata = ${JSON.stringify(data)} -->`;
 }
 
 function shouldRun() {
@@ -9679,7 +9687,7 @@ function addComment(octokit, subjectId) {
       `,
     {
       subjectId,
-      body: BODY_COMMENT,
+      body: `${BODY_COMMENT} ${addMetadata({ action: 'linked_issue' })}`,
     }
   );
 }
@@ -9719,11 +9727,36 @@ function getLinkedIssues(
   );
 }
 
-function deleteLinkedIssueComments(octokit, nodes = []) {
-  if (!nodes.length) {
-    return;
-  }
+async function util_getPrComments({ octokit, repoName, prNumber, owner }) {
+  const issues = await octokit.paginate(
+    "GET /repos/{owner}/{repo}/issues/{prNumber}/comments",
+    {
+      owner,
+      repo: repoName,
+      prNumber,
+    }
+  );
 
+  const linkedIssuesComments = issues.filter((issue) => {
+    // it will only filter comments made by this action
+
+    const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+
+    if (match) {
+      const actionName = JSON.parse(match[1])["action"];
+
+      return actionName === 'linked_issue';
+    }
+  });
+
+  return linkedIssuesComments
+}
+
+/*export function deleteLinkedIssueComments({
+  octokit,
+  prNumber: number,
+  repoName: name,
+}) {
   return Promise.all(
     nodes.map((id) =>
       octokit.graphql(
@@ -9740,7 +9773,7 @@ function deleteLinkedIssueComments(octokit, nodes = []) {
       )
     )
   );
-}
+}*/
 
 ;// CONCATENATED MODULE: ./src/action.js
 
@@ -9777,12 +9810,26 @@ async function run() {
 
     const token = core.getInput("github-token");
     const octokit = github.getOctokit(token);
-    const data = await getLinkedIssues(octokit, name, number, owner.login);
+    const data = await getLinkedIssues({
+      prNumber: number,
+      repoName: name,
+      repoOwner: owner.login,
+      octokit,
+    });
 
     core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
+
+    const issues = await getPrComments({
+      octokit,
+      repoName: name,
+      prNumber: number,
+      repoOwner: owner.login,
+    });
+
+    core.info("Issues: " + format(issues));
 
     const pullRequest = data?.repository?.pullRequest;
     const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
@@ -9800,12 +9847,26 @@ async function run() {
       core.setFailed(ERROR_MESSAGE);
     } else {
       // getting only github-actions comment ids
-      const commentsId = pullRequest?.comments?.nodes
+      /*const nodeIds = pullRequest?.comments?.nodes
         .filter(({ author: { login } }) => login === "github-actions")
-        .map(({ id }) => id);
+        .map(({ id }) => id);*/
 
-      await deleteLinkedIssueComments(octokit, commentsId);
-      core.debug(`${commentsId.length} Comments deleted.`);
+      octokit
+        .paginate("GET /repos/{owner}/{repo}/issues/{prNumber}/comments", {
+          owner: owner.login,
+          repo: name,
+          prNumber: number,
+        })
+        .then((issues) => {
+          core.info("Issues", format(issues));
+        });
+
+      /*await deleteLinkedIssueComments({
+        octokit,
+        prNumber: number,
+        repoName: name,
+      });*/
+      //core.debug(`${nodeIds.length} Comments deleted.`);
     }
   } catch (error) {
     core.setFailed(error.message);
