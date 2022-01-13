@@ -71,8 +71,7 @@ async function run() {
 
     if (!linkedIssuesCount) {
       const prId = pullRequest?.id;
-      const shouldComment =
-        core.getInput("comment") && prId && !linkedIssuesComments.length;
+      const shouldComment = core.getInput("comment") && prId;
 
       if (shouldComment) {
         const body = core.getInput("custom-body-comment");
