@@ -1,7 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import minimatch from "minimatch";
-import { BODY_COMMENT } from "./constants.js";
 
 function parseCSV(value) {
   if (value.trim() === "") return [];
@@ -78,10 +77,18 @@ export function getLinkedIssues(
 }
 
 function filterLinkedIssuesComments(issues = []) {
+  core.info(`
+  *** issues *** ${JSON.stringify(issues)}
+  `);
+
   return issues.filter((issue) => {
     // it will only filter comments made by this action
     const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
 
+    core.info(`
+  *** match *** ${match} ${JSON.parse(match[1])["action"]}
+  `);
+  
     if (match) {
       const actionName = JSON.parse(match[1])["action"];
       return actionName === 'linked_issue';
