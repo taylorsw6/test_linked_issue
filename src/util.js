@@ -78,7 +78,7 @@ function filterLinkedIssuesComments(issues = []) {
 
   return issues.filter((issue) => {
     // it will only filter comments made by this action
-    const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+    const match = issue?.body?.match(/<!-- metadata = (.*) -->/);
 
     core.info(`
   *** match *** ${match}
