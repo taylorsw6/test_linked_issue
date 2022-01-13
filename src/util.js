@@ -105,6 +105,9 @@ export async function getPrComments({ octokit, repoName, prNumber, repoOwner }) 
 }
 
 export function deleteLinkedIssueComments(octokit, comments) {
+  core.info(`
+  *** issues to delete *** ${JSON.stringify(comments)}
+  `);
   return Promise.all(
     comments.map(({id}) =>
       octokit.graphql(
