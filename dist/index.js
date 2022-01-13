@@ -9662,7 +9662,7 @@ function shouldRun() {
   const result = excludeBranches.some((p) => minimatch(sourceBranch, p));
 
   if (result) {
-    core.notice("source branch matched the exclude pattern, exiting ...");
+    core.notice("source branch matched the exclude pattern, exiting...");
   }
 
   return !result;
@@ -9684,26 +9684,13 @@ function addComment(octokit, subjectId) {
   );
 }
 
-function getLinkedIssues(
-  octokit,
-  repositoryName,
-  pullRequestNumber,
-  owner
-) {
+function getLinkedIssues({ octokit, prNumber, repoOwner, repoName }) {
   return octokit.graphql(
     `
     query getLinkedIssues($owner: String!, $name: String!, $number: Int!) {
       repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
           id
-          comments(first: 100){
-            nodes {
-              id
-              author {
-                login
-              }
-            }
-          }
           closingIssuesReferences {
             totalCount
           }
@@ -9712,20 +9699,20 @@ function getLinkedIssues(
     }
     `,
     {
-      owner,
-      name: repositoryName,
-      number: pullRequestNumber,
+      owner: repoOwner,
+      name: repoName,
+      number: prNumber,
     }
   );
 }
 
-/*export function deleteLinkedIssueComments(octokit, nodes = []) {
-  if (!nodes.length) {
-    return;
-  }
-
+/*export function deleteLinkedIssueComments({
+  octokit,
+  prNumber: number,
+  repoName: name,
+}) {
   return Promise.all(
-    nodes.map((id) =>
+    nodeIds.map((id) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
