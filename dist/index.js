@@ -9748,7 +9748,7 @@ async function getPrComments({ octokit, repoName, prNumber, repoOwner }) {
 
 function deleteLinkedIssueComments(octokit, comments) {
   return Promise.all(
-    comments.map((id) =>
+    comments.map(({id}) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -9758,7 +9758,7 @@ function deleteLinkedIssueComments(octokit, comments) {
       }
       `,
         {
-          id,
+          id: id.toString(),
         }
       )
     )
