@@ -9783,7 +9783,7 @@ async function run() {
         prNumber: number,
       })
       .then((issues) => {
-        core.info("Issues", format(issues));
+        core.info("Issues: "+format(issues));
       });
 
     const pullRequest = data?.repository?.pullRequest;
