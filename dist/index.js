@@ -9827,6 +9827,11 @@ async function run() {
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
+    if(linkedIssuesComments.length){
+      await deleteLinkedIssueComments(octokit, linkedIssuesComments);
+      core.debug(`${nodeIds.length} Comments deleted.`);
+    } 
+
     if (!linkedIssuesCount) {
       const prId = pullRequest?.id;
       const shouldComment =
@@ -9840,10 +9845,8 @@ async function run() {
       }
 
       core.setFailed(ERROR_MESSAGE);
-    } else if (linkedIssuesComments.length) {
-      await deleteLinkedIssueComments(octokit, linkedIssuesComments);
-      core.debug(`${nodeIds.length} Comments deleted.`);
     }
+    
   } catch (error) {
     core.setFailed(error.message);
   } finally {
