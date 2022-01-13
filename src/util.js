@@ -79,7 +79,7 @@ export function getLinkedIssues(
   );
 }
 
-export function deleteLinkedIssueComments(octokit, nodes = []) {
+/*export function deleteLinkedIssueComments(octokit, nodes = []) {
   if (!nodes.length) {
     return;
   }
@@ -100,4 +100,4 @@ export function deleteLinkedIssueComments(octokit, nodes = []) {
       )
     )
   );
-}
+}*/
