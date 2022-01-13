@@ -9,7 +9,7 @@ function parseCSV(value) {
 }
 
 function addMetadata(data) {
-  // to identify the comment was made by this action
+  // metadata to identify the comment was made by this action
   // https://github.com/probot/metadata#how-it-works
   return `<!-- metadata = ${JSON.stringify(data)} -->`;
 }
@@ -34,7 +34,7 @@ export function shouldRun() {
   return !result;
 }
 
-export function addComment(octokit, subjectId) {
+export function addComment({octokit, prId, body}) {
   return octokit.graphql(
     `
         mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
@@ -44,8 +44,8 @@ export function addComment(octokit, subjectId) {
         }
       `,
     {
-      subjectId,
-      body: `${BODY_COMMENT} ${addMetadata({ action: 'linked_issue' })}`,
+      subjectId: prId,
+      body,
     }
   );
 }
@@ -89,6 +89,7 @@ function filterLinkedIssuesComments(issues = []) {
   return issues.filter((issue) => {
     // it will only filter comments made by this action
     const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+
     if (match) {
       const actionName = JSON.parse(match[1])["action"];
       return actionName === 'linked_issue';
@@ -109,13 +110,9 @@ export async function getPrComments({ octokit, repoName, prNumber, repoOwner }) 
  return filterLinkedIssuesComments(issues);
 }
 
-/*export function deleteLinkedIssueComments({
-  octokit,
-  prNumber: number,
-  repoName: name,
-}) {
+export function deleteLinkedIssueComments(octokit, comments) {
   return Promise.all(
-    nodes.map((id) =>
+    comments.map((id) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -130,4 +127,4 @@ export async function getPrComments({ octokit, repoName, prNumber, repoOwner }) 
       )
     )
   );
-}*/
+}
