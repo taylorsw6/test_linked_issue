@@ -36,12 +36,27 @@ async function run() {
 
     const token = core.getInput("github-token");
     const octokit = github.getOctokit(token);
-    const data = await getLinkedIssues(octokit, name, number, owner.login);
+    const data = await getLinkedIssues({
+      prNumber: number,
+      repoName: name,
+      repoOwner: owner.login,
+      octokit,
+    });
 
     core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
+
+    octokit
+      .paginate("GET /repos/{owner}/{repo}/issues/{prNumber}/comments", {
+        owner: owner.login,
+        repo: name,
+        prNumber: number,
+      })
+      .then((issues) => {
+        core.info("Issues", format(issues));
+      });
 
     const pullRequest = data?.repository?.pullRequest;
     const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
@@ -59,12 +74,26 @@ async function run() {
       core.setFailed(ERROR_MESSAGE);
     } else {
       // getting only github-actions comment ids
-      const commentsId = pullRequest?.comments?.nodes
+      /*const nodeIds = pullRequest?.comments?.nodes
         .filter(({ author: { login } }) => login === "github-actions")
-        .map(({ id }) => id);
+        .map(({ id }) => id);*/
 
-      await deleteLinkedIssueComments(octokit, commentsId);
-      core.debug(`${commentsId.length} Comments deleted.`);
+      octokit
+        .paginate("GET /repos/{owner}/{repo}/issues/{prNumber}/comments", {
+          owner: owner.login,
+          repo: name,
+          prNumber: number,
+        })
+        .then((issues) => {
+          core.info("Issues", format(issues));
+        });
+
+      /*await deleteLinkedIssueComments({
+        octokit,
+        prNumber: number,
+        repoName: name,
+      });*/
+      //core.debug(`${nodeIds.length} Comments deleted.`);
     }
   } catch (error) {
     core.setFailed(error.message);
