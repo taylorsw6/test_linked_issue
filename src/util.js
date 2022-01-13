@@ -109,7 +109,7 @@ export function deleteLinkedIssueComments(octokit, comments) {
   *** issues to delete *** ${JSON.stringify(comments)}
   `);
   return Promise.all(
-    comments.map(({id}) =>
+    comments.map(({node_id}) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -119,7 +119,7 @@ export function deleteLinkedIssueComments(octokit, comments) {
       }
       `,
         {
-          id: id.toString(),
+          id: node_id,
         }
       )
     )
