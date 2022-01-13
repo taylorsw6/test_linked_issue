@@ -9687,7 +9687,7 @@ function addComment({octokit, prId, body}) {
       `,
     {
       subjectId: prId,
-      body,
+      body: `${body} ${addMetadata({action: 'linked_issue'})}`,
     }
   );
 }
@@ -9704,14 +9704,6 @@ function getLinkedIssues(
       repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
           id
-          comments(first: 100){
-            nodes {
-              id
-              author {
-                login
-              }
-            }
-          }
           closingIssuesReferences {
             totalCount
           }
