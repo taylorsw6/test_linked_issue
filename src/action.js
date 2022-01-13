@@ -6,6 +6,7 @@ import {
   getLinkedIssues,
   addComment,
   deleteLinkedIssueComments,
+  getPrComments
 } from "./util.js";
 
 const format = (obj) => JSON.stringify(obj, undefined, 2);
