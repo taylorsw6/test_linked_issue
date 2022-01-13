@@ -8,7 +8,7 @@ function parseCSV(value) {
 }
 
 function addMetadata(data) {
-  // metadata to identify the comment was made by this action
+  // metadata to identify the comment was made by this action 
   // https://github.com/probot/metadata#how-it-works
   return `<!-- metadata = ${JSON.stringify(data)} -->`;
 }

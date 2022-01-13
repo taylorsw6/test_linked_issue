@@ -9650,7 +9650,7 @@ function parseCSV(value) {
 }
 
 function addMetadata(data) {
-  // metadata to identify the comment was made by this action
+  // metadata to identify the comment was made by this action 
   // https://github.com/probot/metadata#how-it-works
   return `<!-- metadata = ${JSON.stringify(data)} -->`;
 }
@@ -9829,7 +9829,7 @@ async function run() {
 
     if(linkedIssuesComments.length){
       await deleteLinkedIssueComments(octokit, linkedIssuesComments);
-      core.debug(`${nodeIds.length} Comments deleted.`);
+      core.debug(`${nodeIds.length} Comments deleted. `);
     } 
 
     if (!linkedIssuesCount) {
