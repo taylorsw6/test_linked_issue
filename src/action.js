@@ -36,7 +36,6 @@ async function run() {
     } = payload;
 
     const token = core.getInput("github-token");
-    const shouldComment = core.getInput("comment");
 
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues({
@@ -61,24 +60,26 @@ async function run() {
       repoOwner: owner.login,
     });
 
-    core.info("Issues: " + format(linkedIssuesComments));
+    core.info("Issues:  " + format(linkedIssuesComments));
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
     if (!linkedIssuesCount) {
       const prId = pullRequest?.id;
+      const shouldComment =
+        core.getInput("comment") && prId && !linkedIssuesComments.length;
 
-      if (prId && !linkedIssuesComments.length && shouldComment) {
+      if (shouldComment) {
         const body = core.getInput("custom-body-comment");
-        await addComment({octokit, prId, body});
-        
+        await addComment({ octokit, prId, body });
+
         core.debug(`Comment added for ${prId} PR`);
       }
 
       core.setFailed(ERROR_MESSAGE);
     } else if (linkedIssuesComments.length) {
-        await deleteLinkedIssueComments(octokit, linkedIssuesComments);
-        core.debug(`${nodeIds.length} Comments deleted.`);
+      await deleteLinkedIssueComments(octokit, linkedIssuesComments);
+      core.debug(`${nodeIds.length} Comments deleted.`);
     }
   } catch (error) {
     core.setFailed(error.message);
