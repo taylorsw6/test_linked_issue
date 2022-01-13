@@ -9719,7 +9719,7 @@ function getLinkedIssues(
   );
 }
 
-function deleteLinkedIssueComments(octokit, nodes = []) {
+/*export function deleteLinkedIssueComments(octokit, nodes = []) {
   if (!nodes.length) {
     return;
   }
@@ -9740,7 +9740,7 @@ function deleteLinkedIssueComments(octokit, nodes = []) {
       )
     )
   );
-}
+}*/
 
 ;// CONCATENATED MODULE: ./src/action.js
 
