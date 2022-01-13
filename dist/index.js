@@ -9651,7 +9651,7 @@ function parseCSV(value) {
 }
 
 function addMetadata(data) {
-  // to identify the comment was made by this action
+  // metadata to identify the comment was made by this action
   // https://github.com/probot/metadata#how-it-works
   return `<!-- metadata = ${JSON.stringify(data)} -->`;
 }
@@ -9676,7 +9676,7 @@ function shouldRun() {
   return !result;
 }
 
-function addComment(octokit, subjectId) {
+function addComment({octokit, prId, body}) {
   return octokit.graphql(
     `
         mutation addCommentWhenMissingLinkIssues($subjectId: String!, $body: String!) {
@@ -9686,8 +9686,8 @@ function addComment(octokit, subjectId) {
         }
       `,
     {
-      subjectId,
-      body: `${BODY_COMMENT} ${addMetadata({ action: 'linked_issue' })}`,
+      subjectId: prId,
+      body,
     }
   );
 }
@@ -9731,6 +9731,7 @@ function filterLinkedIssuesComments(issues = []) {
   return issues.filter((issue) => {
     // it will only filter comments made by this action
     const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
+
     if (match) {
       const actionName = JSON.parse(match[1])["action"];
       return actionName === 'linked_issue';
@@ -9751,13 +9752,9 @@ async function getPrComments({ octokit, repoName, prNumber, repoOwner }) {
  return filterLinkedIssuesComments(issues);
 }
 
-/*export function deleteLinkedIssueComments({
-  octokit,
-  prNumber: number,
-  repoName: name,
-}) {
+function deleteLinkedIssueComments(octokit, comments) {
   return Promise.all(
-    nodes.map((id) =>
+    comments.map((id) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -9772,7 +9769,7 @@ async function getPrComments({ octokit, repoName, prNumber, repoOwner }) {
       )
     )
   );
-}*/
+}
 
 ;// CONCATENATED MODULE: ./src/action.js
 
@@ -9808,6 +9805,8 @@ async function run() {
     } = payload;
 
     const token = core.getInput("github-token");
+    const shouldComment = core.getInput("comment");
+
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues({
       prNumber: number,
@@ -9821,51 +9820,34 @@ async function run() {
     ${format(data)}
     `);
 
-    const issues = await getPrComments({
+    const pullRequest = data?.repository?.pullRequest;
+    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
+
+    const linkedIssuesComments = await getPrComments({
       octokit,
       repoName: name,
       prNumber: number,
       repoOwner: owner.login,
     });
 
-    core.info("Issues: " + format(issues));
-
-    const pullRequest = data?.repository?.pullRequest;
-    const linkedIssuesCount = pullRequest?.closingIssuesReferences?.totalCount;
+    core.info("Issues: " + format(linkedIssuesComments));
 
     core.setOutput("linked_issues_count", linkedIssuesCount);
 
     if (!linkedIssuesCount) {
-      const subjectId = pullRequest?.id;
+      const prId = pullRequest?.id;
 
-      if (subjectId) {
-        await addComment(octokit, subjectId);
-        core.debug(`Comment added for ${subjectId} PR`);
+      if (prId && !linkedIssuesComments.length && shouldComment) {
+        const body = core.getInput("custom-body-comment");
+        await addComment({octokit, prId, body});
+        
+        core.debug(`Comment added for ${prId} PR`);
       }
 
       core.setFailed(ERROR_MESSAGE);
-    } else {
-      // getting only github-actions comment ids
-      /*const nodeIds = pullRequest?.comments?.nodes
-        .filter(({ author: { login } }) => login === "github-actions")
-        .map(({ id }) => id);*/
-
-      octokit
-        .paginate("GET /repos/{owner}/{repo}/issues/{prNumber}/comments", {
-          owner: owner.login,
-          repo: name,
-          prNumber: number,
-        })
-        .then((issues) => {
-          core.info("Issues", format(issues));
-        });
-
-      /*await deleteLinkedIssueComments({
-        octokit,
-        prNumber: number,
-        repoName: name,
-      });*/
-      //core.debug(`${nodeIds.length} Comments deleted.`);
+    } else if (linkedIssuesComments.length) {
+        await deleteLinkedIssueComments(octokit, linkedIssuesComments);
+        core.debug(`${nodeIds.length} Comments deleted.`);
     }
   } catch (error) {
     core.setFailed(error.message);
