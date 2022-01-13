@@ -9832,13 +9832,12 @@ async function run() {
 
     if(linkedIssuesComments.length){
       await deleteLinkedIssueComments(octokit, linkedIssuesComments);
-      core.debug(`${linkedIssuesComments.length} Comments deleted. `);
+      core.debug(`${linkedIssuesComments.length} Comments deleted.`);
     } 
 
     if (!linkedIssuesCount) {
       const prId = pullRequest?.id;
-      const shouldComment =
-        core.getInput("comment") && prId && !linkedIssuesComments.length;
+      const shouldComment = core.getInput("comment") && prId;
 
       if (shouldComment) {
         const body = core.getInput("custom-body-comment");
