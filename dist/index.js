@@ -9723,7 +9723,7 @@ function filterLinkedIssuesComments(issues = []) {
     const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
 
     core.info(`
-  *** match *** ${match} ${JSON.parse(match[1])["action"]}
+  *** match *** ${match}
   `);
   
     if (match) {
