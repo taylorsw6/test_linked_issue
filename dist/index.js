@@ -9727,7 +9727,7 @@ function getLinkedIssues(
   );
 }
 
-async function util_getPrComments({ octokit, repoName, prNumber, owner }) {
+async function getPrComments({ octokit, repoName, prNumber, owner }) {
   const issues = await octokit.paginate(
     "GET /repos/{owner}/{repo}/issues/{prNumber}/comments",
     {
