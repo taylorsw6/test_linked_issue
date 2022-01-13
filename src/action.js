@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { ERROR_MESSAGE, } from "./constants.js";
+
+import { ERROR_MESSAGE } from "./constants.js";
 import {
   getLinkedIssues,
   addComment,
@@ -19,7 +20,7 @@ async function run() {
 
     if (eventName !== "pull_request") {
       throw new Error(
-        `This action can only run on "pull_request", but "${eventName}" was received.Please check your workflow.`
+        `This action can only run on "pull_request", but "${eventName}" was received. Please check your workflow.`
       );
     }
 
@@ -37,7 +38,7 @@ async function run() {
     const octokit = github.getOctokit(token);
     const data = await getLinkedIssues(octokit, name, number, owner.login);
 
-    core.info(`
+    core.debug(`
     *** GRAPHQL DATA ***
     ${format(data)}
     `);
@@ -52,15 +53,18 @@ async function run() {
 
       if (subjectId) {
         await addComment(octokit, subjectId);
-        core.debug("Comment added.");
-
-        await deleteLinkedIssueComments(octokit, pullRequest?.comments?.nodes, core);
-        
+        core.debug(`Comment added for ${subjectId} PR`);
       }
 
       core.setFailed(ERROR_MESSAGE);
     } else {
-      await deleteLinkedIssueComments(octokit);
+      // getting only github-actions comment ids
+      const commentsId = pullRequest?.comments?.nodes
+        .filter(({ author: { login } }) => login === "github-actions")
+        .map(({ id }) => id);
+
+      await deleteLinkedIssueComments(octokit, commentsId);
+      core.debug(`${commentsId.length} Comments deleted.`);
     }
   } catch (error) {
     core.setFailed(error.message);
