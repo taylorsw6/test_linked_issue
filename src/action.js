@@ -66,7 +66,7 @@ async function run() {
 
     if(linkedIssuesComments.length){
       await deleteLinkedIssueComments(octokit, linkedIssuesComments);
-      core.debug(`${nodeIds.length} Comments deleted. `);
+      core.debug(`${linkedIssuesComments.length} Comments deleted.`);
     } 
 
     if (!linkedIssuesCount) {
