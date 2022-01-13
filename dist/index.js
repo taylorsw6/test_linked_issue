@@ -9644,7 +9644,6 @@ var minimatch = __nccwpck_require__(3973);
 
 
 
-
 function parseCSV(value) {
   if (value.trim() === "") return [];
   return value.split(",").map((p) => p.trim());
@@ -9715,10 +9714,18 @@ function getLinkedIssues({ octokit, prNumber, repoOwner, repoName }) {
 }
 
 function filterLinkedIssuesComments(issues = []) {
+  core.info(`
+  *** issues *** ${JSON.stringify(issues)}
+  `);
+
   return issues.filter((issue) => {
     // it will only filter comments made by this action
     const match = issue?.body?.match(/\n\n<!-- metadata = (.*) -->/);
 
+    core.info(`
+  *** match *** ${match} ${JSON.parse(match[1])["action"]}
+  `);
+  
     if (match) {
       const actionName = JSON.parse(match[1])["action"];
       return actionName === 'linked_issue';
