@@ -9669,7 +9669,7 @@ function shouldRun() {
   const result = excludeBranches.some((p) => minimatch(sourceBranch, p));
 
   if (result) {
-    core.notice("source branch matched the exclude pattern, exiting.. .");
+    core.notice("source branch matched the exclude pattern, exiting...");
   }
 
   return !result;
@@ -9747,8 +9747,11 @@ async function getPrComments({ octokit, repoName, prNumber, repoOwner }) {
 }
 
 function deleteLinkedIssueComments(octokit, comments) {
+  core.info(`
+  *** issues to delete *** ${JSON.stringify(comments)}
+  `);
   return Promise.all(
-    comments.map(({id}) =>
+    comments.map(({node_id}) =>
       octokit.graphql(
         `
       mutation deleteCommentLinkedIssue($id: ID!) {
@@ -9758,7 +9761,7 @@ function deleteLinkedIssueComments(octokit, comments) {
       }
       `,
         {
-          id: id.toString(),
+          id: node_id,
         }
       )
     )
@@ -9784,7 +9787,7 @@ async function run() {
 
     if (eventName !== "pull_request") {
       throw new Error(
-        `This action can only run on "pull_request", but "${eventName}" was received.Please check your workflow.`
+        `This action can only run on "pull_request", but "${eventName}" was received. Please check your workflow.`
       );
     }
 
